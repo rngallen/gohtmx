@@ -1,0 +1,35 @@
+<!-- Include Header -->
+{{template "views/partials/header" .}}
+
+<div class="row mt-4 g-4 mx-4">
+    <div class="col-8">
+        <h1 class="mb-4">Film List</h1>
+        <ul class="list-group fs-5 me-5" id="film-list">
+            {{ range .Movies }}
+                {{ block "film-list-element" .}}
+                    <li class="list-group-item bg-primary text-white">{{ .Title }} - {{ .Director }}</li>
+                {{ end }}
+            {{ end }}
+        </ul>
+    </div>
+    <div class="col-4">
+        <h1 class="mb-4">Add Film</h1>
+        <form hx-post="/addFilm" hx-target="#film-list" hx-swap="afterbegin" hx-indicator="#spinner">
+            <div class="mb-2">
+                <label for="title-title">Fitle</label>
+                <input type="text" name="title" id="title-title" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="film-director">Director</label>
+                <input type="text" name="director" id="file-director" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <span class="spinner-border spinner-border-sm htmx-indicator" id="spinner" aria-hidden="true"></span>
+                Submit
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Iclude Footer -->
+{{template "views/partials/footer" .}}
