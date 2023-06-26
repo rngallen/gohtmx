@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/template/html/v2"
 	"github.com/rngallen/gohtmx/services/logs"
@@ -44,12 +43,6 @@ func main() {
 		MaxAge: 3600,
 	}))
 
-	// Favicon
-	app.Use(favicon.New(favicon.Config{
-		File: "./static/img/favicon.ico",
-		URL:  "/favicon.ico",
-	}))
-
 	app.Get("", home)
 	app.Post("/addFilm", addFilm)
 
@@ -78,8 +71,9 @@ func addFilm(c *fiber.Ctx) error {
 	if err := c.BodyParser(&input); err != nil {
 		return c.Render("views/index", fiber.Map{"Error": err.Error()})
 	}
+
 	// Simulate time taken to interact with database
-	time.Sleep(time.Second / 5)
+	time.Sleep(time.Millisecond / 5)
 	movies = append(movies, Film{input.Title, input.Director})
 	tmpl := template.Must(template.ParseFiles("views/index.html"))
 	tmpl.ExecuteTemplate(c.Response().BodyWriter(), "film-list-element", Film{input.Title, input.Director})
