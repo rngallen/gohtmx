@@ -4,12 +4,13 @@ import (
 	"embed"
 	"html/template"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/template/html/v2"
-	"github.com/rngallen/gohtmx/services/logs"
 )
 
 //go:embed views/*
@@ -20,8 +21,12 @@ var embedDirStatic embed.FS
 
 func main() {
 
-	// Activate logger
-	logs.AppLogger()
+	// Output to ./logs.log file
+	f, err := os.OpenFile("logs.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		return
+	}
+	log.SetOutput(f)
 
 	// Embed html files to compiled file
 	engine := html.NewFileSystem(http.FS(embedDirViews), ".html")
@@ -46,7 +51,7 @@ func main() {
 	app.Get("", home)
 	app.Post("/addFilm", addFilm)
 
-	logs.ErrorLogger.Fatalln(app.Listen(":80"))
+	log.Panic(app.Listen(":80"))
 }
 
 type Film struct {
@@ -62,6 +67,12 @@ var movies = []Film{
 }
 
 func home(c *fiber.Ctx) error {
+	log.Info("log info")
+	log.Debug("debut log")
+	log.Warn("warning log")
+	log.Error("error log")
+	// log.Fatal("fatal log")
+	log.Panic("panic log")
 	return c.Render("views/index", fiber.Map{"Movies": movies})
 }
 
@@ -73,9 +84,12 @@ func addFilm(c *fiber.Ctx) error {
 	}
 
 	// Simulate time taken to interact with database
-	time.Sleep(time.Millisecond / 5)
+	time.Sleep(time.Millisecond * 200)
+	// Add new movies to the template
 	movies = append(movies, Film{input.Title, input.Director})
+	// Parse template
 	tmpl := template.Must(template.ParseFiles("views/index.html"))
+	// Add added movies to UI without refreshing
 	tmpl.ExecuteTemplate(c.Response().BodyWriter(), "film-list-element", Film{input.Title, input.Director})
 
 	return nil
